@@ -200,22 +200,53 @@ resource "aws_opsworks_stack" "tf-acc" {
 }
 `
 
+var testAccAwsOpsworksStackConfigChef12VpcCreate = testAccAwsOpsworksStackIamConfig + `
+resource "aws_vpc" "tf-acc" {
+  cidr_block = "10.3.5.0/24"
+}
+resource "aws_subnet" "tf-acc" {
+  vpc_id = "${aws_vpc.tf-acc.id}"
+  cidr_block = "${aws_vpc.tf-acc.cidr_block}"
+  availability_zone = "us-west-2a"
+}
+resource "aws_opsworks_stack" "tf-acc" {
+  name = "tf-opsworks-acc"
+  region = "us-west-2"
+  vpc_id = "${aws_vpc.tf-acc.id}"
+  default_subnet_id = "${aws_subnet.tf-acc.id}"
+  service_role_arn = "${aws_iam_role.opsworks_service.arn}"
+  default_instance_profile_arn = "${aws_iam_instance_profile.opsworks_instance.arn}"
+  default_os = "Amazon Linux 2014.09"
+  default_root_device_type = "ebs"
+  custom_json = "{\"key\": \"value\"}"
+  configuration_manager_version = "12"
+  use_opsworks_security_groups = false
+}
+`
+
 func TestAccAWSOpsworksStackVpc(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAwsOpsworksStackDestroy,
+		Steps: []resource.TestStep{resource.TestStep{
+			Config: testAccAwsOpsworksStackConfigVpcCreate,
+			Check:  testAccAwsOpsworksStackCheckResourceAttrsCreate,
+		},
+			resource.TestStep{Config: testAccAWSOpsworksStackConfigVpcUpdate, Check: resource.ComposeTestCheckFunc(testAccAwsOpsworksStackCheckResourceAttrsUpdate, testAccAwsOpsworksCheckVpc)},
+		},
+	})
+}
+
+func TestAccAWSOpsworksStackChef12Vpc(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAwsOpsworksStackDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccAwsOpsworksStackConfigVpcCreate,
-				Check:  testAccAwsOpsworksStackCheckResourceAttrsCreate,
-			},
-			resource.TestStep{
-				Config: testAccAWSOpsworksStackConfigVpcUpdate,
-				Check: resource.ComposeTestCheckFunc(
-					testAccAwsOpsworksStackCheckResourceAttrsUpdate,
-					testAccAwsOpsworksCheckVpc,
-				),
+				Config: testAccAwsOpsworksStackConfigChef12VpcCreate,
+				Check:  testAccAwsOpsworksStackChef12CheckResourceAttrsCreate,
 			},
 		},
 	})
@@ -255,6 +286,45 @@ var testAccAwsOpsworksStackCheckResourceAttrsCreate = resource.ComposeTestCheckF
 		"aws_opsworks_stack.tf-acc",
 		"configuration_manager_version",
 		"11.10",
+	),
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"use_opsworks_security_groups",
+		"false",
+	),
+)
+
+/// yours
+var testAccAwsOpsworksStackChef12CheckResourceAttrsCreate = resource.ComposeTestCheckFunc(
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"name",
+		"tf-opsworks-acc",
+	),
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"default_availability_zone",
+		"us-west-2a",
+	),
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"default_os",
+		"Amazon Linux 2014.09",
+	),
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"default_root_device_type",
+		"ebs",
+	),
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"custom_json",
+		`{"key": "value"}`,
+	),
+	resource.TestCheckResourceAttr(
+		"aws_opsworks_stack.tf-acc",
+		"configuration_manager_version",
+		"12",
 	),
 	resource.TestCheckResourceAttr(
 		"aws_opsworks_stack.tf-acc",
