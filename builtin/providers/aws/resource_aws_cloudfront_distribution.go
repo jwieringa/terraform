@@ -47,7 +47,7 @@ func resourceAwsCloudFrontDistribution() *schema.Resource {
 						},
 						"default_ttl": &schema.Schema{
 							Type:     schema.TypeInt,
-							Required: true,
+							Required: false,
 						},
 						"forwarded_values": &schema.Schema{
 							Type:     schema.TypeSet,
@@ -89,7 +89,7 @@ func resourceAwsCloudFrontDistribution() *schema.Resource {
 						},
 						"max_ttl": &schema.Schema{
 							Type:     schema.TypeInt,
-							Required: true,
+							Required: false,
 						},
 						"min_ttl": &schema.Schema{
 							Type:     schema.TypeInt,
@@ -172,7 +172,7 @@ func resourceAwsCloudFrontDistribution() *schema.Resource {
 						},
 						"default_ttl": &schema.Schema{
 							Type:     schema.TypeInt,
-							Required: true,
+							Required: false,
 						},
 						"forwarded_values": &schema.Schema{
 							Type:     schema.TypeSet,
@@ -214,7 +214,7 @@ func resourceAwsCloudFrontDistribution() *schema.Resource {
 						},
 						"max_ttl": &schema.Schema{
 							Type:     schema.TypeInt,
-							Required: true,
+							Required: false,
 						},
 						"min_ttl": &schema.Schema{
 							Type:     schema.TypeInt,

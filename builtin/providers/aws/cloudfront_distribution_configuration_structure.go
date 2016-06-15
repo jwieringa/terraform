@@ -243,8 +243,12 @@ func expandCacheBehavior(m map[string]interface{}) *cloudfront.CacheBehavior {
 		TargetOriginId:       aws.String(m["target_origin_id"].(string)),
 		ForwardedValues:      expandForwardedValues(m["forwarded_values"].(*schema.Set).List()[0].(map[string]interface{})),
 		MinTTL:               aws.Int64(int64(m["min_ttl"].(int))),
-		MaxTTL:               aws.Int64(int64(m["max_ttl"].(int))),
-		DefaultTTL:           aws.Int64(int64(m["default_ttl"].(int))),
+	}
+	if v, ok := m["max_ttl"]; ok {
+		cb.MaxTTL = aws.Int64(int64(v.(int)))
+	}
+	if v, ok := m["default_ttl"]; ok {
+		cb.DefaultTTL = aws.Int64(int64(v.(int)))
 	}
 	if v, ok := m["trusted_signers"]; ok {
 		cb.TrustedSigners = expandTrustedSigners(v.([]interface{}))
